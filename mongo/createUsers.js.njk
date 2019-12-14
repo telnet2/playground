@@ -1,0 +1,34 @@
+{% if replSetName %}
+try {                                                                                            
+    // rs.initiate must be called one and only once in one of the mongodb instances.
+    rs.initiate();
+    print('sleeping 3 seconds for rs initialize');
+    sleep(3000);
+} catch (err) {
+    print(err)
+}
+{% endif %}
+
+try {
+    xdb = db.getSiblingDB("admin");
+    xdb.createUser({ user: "{{adminUser}}", pwd: "{{adminPass}}", roles: [{ role: "root", db: "admin" }] });
+} catch (err) {
+    print(err);
+}
+
+// Need to reconnect after creating the first user
+db = connect("{{adminUser}}:{{adminPass}}@{{serverIpAddr}}:{{mongoPort}}/admin")
+
+{% for db in dbList %}
+try {
+    xdb = db.getSiblingDB("{{db.name}}")
+    xdb.createUser({
+        user: "{{db.user}}",
+        pwd: "{{db.pass}}",
+        roles: [{ role: "readWrite", db: "{{db.name}}" }, { role: "dbAdmin", db: "{{db.name}}" }]
+    });
+} catch (err) {
+    print(err);
+}
+{% endfor %}
+

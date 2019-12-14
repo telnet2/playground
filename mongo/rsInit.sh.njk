@@ -1,0 +1,4 @@
+{% if replSetName %}
+cd {{mongoHome}}/conf
+mongo mongodb://{{adminUser}}:{{adminPass}}@{{serverIpAddr}}:{{mongoPort}}/admin rsInit.js
+{% endif %}
