@@ -11,5 +11,6 @@ scala_binary(
         "@maven//:com_google_guava_guava",
         "@maven//:com_hivemq_hivemq_mqtt_client",
         "@maven//:io_github_sac_SocketclusterClientJava",
+        "@maven//:com_thesamet_scalapb_scalapb_json4s_2_12"
     ],
 )
