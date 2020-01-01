@@ -1,0 +1,93 @@
+syntax = "proto2";
+
+package msg;
+
+import "vehicle_state.proto";
+
+message LidarFrame {
+  optional string fid = 1;
+  optional double timestamp = 2 [default = nan];
+  optional string trip_id = 3;
+  optional string prev_fid = 4;
+  optional string next_fid = 5;
+  optional string point_cloud_uri = 6;
+
+  // From vehicle state
+  optional GpsMessage gps_message = 7;
+  optional ImuMessage imu_message = 8;
+  optional VehicleInfoMessage vehicle_info_message = 9;
+  optional RTKMessage rtk_message = 10;
+
+  // LOAM related
+  optional uint32 loam_index = 11 [default = 0];
+  optional Pose2DMessage loam_pose2d = 12;
+  optional Pose3DMessage loam_pose3d = 13;
+  optional Pose3DMessage loam_relative_pose3d = 14; //pose of first point assuming pose of last point is I
+  optional Pose3DMessage loam_odometry_relative_pose3d = 15;
+
+  // Loop closure / pose graph optimization related
+  optional double cumulative_distance = 16 [default = nan];
+  optional Pose3DMessage refined_pose3d = 17;
+  optional MatchedFrames matched_frames = 18;
+
+  // Confidence that the rtk pose is correct, higher = better
+  optional uint32 rtk_confidence = 19 [default = 0];
+
+  // For now, either velodyne_lidar64 or hs_lidar
+  optional string lidar_name = 20;
+
+  // Excluded from map building (manual spot checking)
+  optional bool excluded = 21 [default = false];
+
+  // Manually set anchor to ground truth GPS
+  optional Pose3DMessage anchor_pose3d = 22;
+  optional bool is_anchored = 23 [default = false];
+}
+
+// Matched frames from the loop verifier
+message MatchedFrames {
+  repeated MatchedFrame matches = 1;
+}
+
+// Zero cost means the loop pair is manually set
+message MatchedFrame {
+  optional string fid = 1;
+  optional Pose3DMessage relative_pose = 2;
+  optional double cost = 3;
+  enum ManualCheck {
+      NO_MANUAL_CHECK = 0;
+      ACCEPT = 1;
+      REJECT = 2;
+  }
+  optional ManualCheck manual_check = 4 [default = NO_MANUAL_CHECK];
+}
+
+// For internal use in matching pair pose reducer
+message LidarFramePair {
+  optional LidarFrame first = 1;
+  optional LidarFrame second = 2;
+
+  // Initial pose from first to second
+  optional Pose3DMessage initial_pose = 5;
+
+  // Frames to stitch a local map
+  repeated LidarFrame first_frames = 3;
+  repeated LidarFrame second_frames = 4;
+
+  // Relative poses to first and second
+  repeated Pose3DMessage first_relative_poses = 6;
+  repeated Pose3DMessage second_relative_poses = 7;
+}
+
+// Encoded fields are all in base64
+message MapNode {
+  optional int32 lidar_node_map_height = 1;
+  optional int32 lidar_node_map_width = 2;
+  optional string encoded_image = 3;
+  optional string encoded_map = 4;
+
+  optional double altitude = 5;
+  optional string encoded_corner_points_less_sharp = 6;
+  optional string encoded_surface_points_less_flat = 7;
+  optional string encoded_terrain_grid = 8;
+}
