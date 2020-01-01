@@ -29,7 +29,7 @@ enum CartDecisionState {
   BOOTUP = 10;
 }
 
-message AllSensorStatus {
+message AllSensorStatus{
   optional SensorStatus lidar3d_status = 1;
 }
 
@@ -40,6 +40,7 @@ message VehicleState {
   optional Pose3DMessage pose3d_message = 4;
   optional Pose2DMessage pose2d_message = 5;
   optional RTKMessage rtk_message = 6;
+
 }
 message GpsMessage {
   optional double latitude = 1;
@@ -124,7 +125,6 @@ message RTKMessage {
   optional double heading = 6;
   optional double pitch = 7;
   optional double roll = 8;
-
   optional VecENU orientation_covariance = 9;
   optional VecENU velocity = 10;
   optional VecENU velocity_covariance = 11;
@@ -140,37 +140,6 @@ message RTKMessage {
   optional double heading_misalignment_accuracy = 20;
   optional double hdop = 21;
   optional double pdop = 22;
-
-  optional double odometry_x = 23;
-  optional double odometry_y = 24;
-  optional double odometry_theta = 25;
-}
-
-// These are the necessary messages to feed into the localization kalman filter
-message LocalizationSensorFusedMessage {
-  // Lieanr accleration
-  optional double accel_x = 1;
-  optional double accel_y = 2;
-  optional double accel_z = 3;
-
-  // Angular velocity
-  optional double roll_rate = 4;
-  optional double pitch_rate = 5;
-  optional double yaw_rate = 6;
-
-  optional double speed_mps = 7;
-
-  optional double odometry_x = 8;
-  optional double odometry_y = 9;
-  optional double odometry_theta = 10;
-
-  optional double latitude = 11;
-  optional double longitude = 12;
-  optional double altitude = 13;
-  optional double heading = 14;
-
-  optional double imu_timestamp = 15;
-  optional double vehicle_info_timestamp = 16;
 }
 
 message ImuMessage {

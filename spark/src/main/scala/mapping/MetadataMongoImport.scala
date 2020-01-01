@@ -3,13 +3,14 @@ package mapping
 /* LineCounter.scala */
 // import org.apache.spark._
 import java.util.Base64
+
+import com.google.protobuf.TextFormat
+import msg.Mapreduce.LidarFrame
 import org.apache.spark.sql.SparkSession
-import msg.mapreduce.LidarFrame
-import scalapb.TextFormat
 // import org.apache.spark.sql.SparkSession
 
-object LineCounter {
-  def main(args: Array[String]) {
+object MetadataMongoImport {
+  def main(params: Array[String]) {
     val decoder = Base64.getDecoder()
     val spark = SparkSession.builder
       .appName("Line Counter")
@@ -27,6 +28,7 @@ object LineCounter {
 
     val firstRow = logData.head()
 
+//    println(firstRow)
     val proto = LidarFrame.parseFrom(decoder.decode(firstRow.getAs[String](1)))
     println(TextFormat.printToString(proto))
 

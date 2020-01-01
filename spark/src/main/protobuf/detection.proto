@@ -1,0 +1,30 @@
+syntax = "proto2";
+
+package perception;
+
+message Detection2D {
+  optional int32 x = 1;
+  optional int32 y = 2;
+  optional int32 w = 3;
+  optional int32 h = 4;
+  optional int32 class_id = 5;
+  optional double confidence = 6;
+}
+
+message Detection3D {
+  message Point3D {
+    optional double x = 1;
+    optional double y = 2;
+    optional double z = 3;
+  }
+  optional double center_x = 1;
+  optional double center_y = 2;
+  optional double center_z = 3;
+  optional double l = 4;
+  optional double w = 5;
+  optional double h = 6;
+  optional int32 class_id = 7;
+  optional double confidence = 8;
+  optional double theta = 9;
+  repeated Point3D polygon = 10;
+}

@@ -2,7 +2,8 @@ syntax = "proto2";
 
 package msg;
 
-import "vehicle_state.proto";
+import public "vehicle_state.proto";
+import public "detection.proto";
 
 message LidarFrame {
   optional string fid = 1;
@@ -42,6 +43,19 @@ message LidarFrame {
   // Manually set anchor to ground truth GPS
   optional Pose3DMessage anchor_pose3d = 22;
   optional bool is_anchored = 23 [default = false];
+
+  // Lidar to imu extrinsic
+  optional Pose3DMessage lidar_to_imu_extrinsic = 24;
+  // Lidar to rtk extrinsic
+  optional Pose3DMessage lidar_to_rtk_extrinsic = 25;
+
+  optional ObjectDetection3D object_detection_3d = 26;
+
+  optional string topdown_image_uri = 100;
+}
+
+message ObjectDetection3D {
+  repeated perception.Detection3D detection = 1;
 }
 
 // Matched frames from the loop verifier
@@ -90,4 +104,8 @@ message MapNode {
   optional string encoded_corner_points_less_sharp = 6;
   optional string encoded_surface_points_less_flat = 7;
   optional string encoded_terrain_grid = 8;
+
+  optional string encoded_annotation_image = 9;
+
+  optional string geohash = 10;
 }
