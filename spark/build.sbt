@@ -20,7 +20,9 @@ libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "2.4.4"
 libraryDependencies += "org.apache.hadoop" % "hadoop-aws" % "2.7.3"
 libraryDependencies += "com.amazonaws" % "aws-java-sdk" % "1.7.4"
 
-libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.8.0"
+libraryDependencies += "com.google.protobuf" % "protobuf-java" % "3.11.1"
+libraryDependencies += "com.google.protobuf" % "protobuf-java-util" % "3.11.1"
+
 libraryDependencies += "org.mongodb.spark" %% "mongo-spark-connector" % "2.4.1"
 
 // libraryDependencies += "com.thesamet.scalapb" %% "scalapb-runtime" % scalapbVersion % "protobuf"
