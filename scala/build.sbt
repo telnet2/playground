@@ -2,7 +2,7 @@ import scalapb.compiler.Version.scalapbVersion
 
 scalaVersion := "2.12.10"
 
-name := "SimpleExample"
+name := "ScalaPractice"
 version := "1.0"
 
 // For finding google/protobuf/descriptor.proto
@@ -10,8 +10,9 @@ libraryDependencies += "com.thesamet.scalapb" %% "scalapb-runtime" % scalapbVers
 
 // https://mvnrepository.com/artifact/com.thesamet.scalapb/scalapb-json4s
 libraryDependencies += "com.thesamet.scalapb" %% "scalapb-json4s" % "0.9.3"
+libraryDependencies += "com.github.andyglow" %% "websocket-scala-client" % "0.3.0"
 
-mainClass in (Compile, run) := Some("coding.ValidateParen")
+mainClass in (Compile, run) := Some("coding.Problems")
 
 // https://github.com/thesamet/sbt-protoc
 // PB.protocVersion := "-v3.10.0"
