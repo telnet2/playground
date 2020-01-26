@@ -1,0 +1,125 @@
+#!/bin/bash
+
+# Assume running with root permission
+
+# Make file system if it's not ready
+mkfs() {
+    if [[ ! -d /data ]]; then
+       sudo mkdir /data
+       sudo mkfs.xfs /dev/vdb
+       sudo mount -t xfs /dev/vdb /data
+       sudo chown -R {{user}}:{{user}} /data
+    fi
+
+
+    if [[ ! -d /backup ]]; then
+       sudo mkdir /backup
+       sudo mkfs.xfs /dev/vdc
+       sudo mount -t xfs /dev/vdc /backup
+       sudo chown -R {{user}}:{{user}} /backup
+    fi
+}
+
+
+# No mongo installed or No 4.2 version is installed
+mongo_install() {
+    if [[ -z $(which mongo) || -z $(mongo --version | grep 4.2) ]]; then
+        # apt-get install libcurl3
+
+        # sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+        wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+
+
+        ubuntu_version=$(lsb_release -a | grep Release)
+        if [[ $ubuntu_version =~ "16.04" ]]; then
+            # echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+            echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+        elif [[ $ubuntu_version =~ "18.04" ]]; then
+            # echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+            echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+        fi
+
+        apt-get update
+        apt-get install -y mongodb-org mongodb-org-tools mongodb-org-shell mongodb-org-server mongodb-org-mongos
+    fi
+}
+
+disable_transparent_hugepages() {
+    if [[ ! -f /etc/init.d/disable-transparent-hugepages ]]; then
+        cp ./disable-transparent-hugepages /etc/init.d/disable-transparent-hugepages
+        chmod 755 /etc/init.d/disable-transparent-hugepages
+        update-rc.d disable-transparent-hugepages defaults
+    fi
+}
+
+# make a link to systemd config dir
+mongo_enable() {
+    rm -f {/usr/lib,/lib,/etc}/systemd/system/mongod_{{serviceName}}.service
+    ln -s {{mongoHome}}/conf/mongod_{{serviceName}}.service /etc/systemd/system
+
+    systemctl daemon-reload
+
+
+    # enable the service
+    systemctl enable mongod_{{serviceName}}
+}
+
+
+mongo_start() {
+    # Fix ownership for {{user}}
+    chown -R {{user}}:{{user}} {{mongoHome}}
+
+    if [[ ! -z $(which mongo) ]]; then
+        # in case mongod is running already
+        echo systemctl stop mongod_{{serviceName}}
+        systemctl stop mongod_{{serviceName}}
+        sleep 1
+
+        if [[ -f "{{mongoHome}}/conf/mongo-rs.key" ]]; then 
+            chmod 400 {{mongoHome}}/conf/mongo-rs.key
+        fi
+
+        {% if replSetName and hostId == 0 %}
+            # ReplicaSet Initialize
+            echo mongod --config {{mongoHome}}/conf/mongod.conf 
+            sudo -u {{user}} mongod --config {{mongoHome}}/conf/mongod.conf &
+
+            sleep 1
+            MONGOD_PID=$(ps au | awk '/mongod/ {print $2}')
+
+            sudo -u {{user}} mongo localhost:{{mongoPort}}/admin {{mongoHome}}/conf/createUsers.js
+            sleep 1
+
+            echo kill -QUIT $MONGOD_PID
+            kill -QUIT $MONGOD_PID
+            sleep 1
+
+            # in case, if the mongo wasn't shutdown gracefully
+            if [[ -f /tmp/mongodb-8270.sock ]]; then
+                rm -rf /tmp/mongodb-8270.sock
+            fi
+        {% endif %}
+
+        # start the service
+        systemctl start mongod_{{serviceName}}
+    fi
+
+    # Fix ownership for {{user}}
+    chown -R {{user}}:{{user}} {{mongoHome}}
+
+    # check if process is running
+    sleep 1
+    echo "Check if mongo is running ..."
+    ps -ef | grep mongod | grep -v grep
+
+
+    # check if the launch was ok
+    sleep 1
+    tail {{mongoHome}}/logs/mongod.log
+}
+
+
+disable_transparent_hugepages
+mongo_install
+mongo_enable
+mongo_start

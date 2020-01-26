@@ -1,0 +1,5 @@
+{% if replSetName and hostId == 0 %}
+{% for host in replSet %}
+rs.add("{{host.serverIpAddr}}:{{host.mongoPort}}")
+{% endfor %}
+{% endif %}
