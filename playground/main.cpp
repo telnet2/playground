@@ -7,9 +7,18 @@
 //
 
 #include <iostream>
+#include <boost/assign/std/vector.hpp>
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    using namespace std;
+    using namespace boost::assign;
+    
+    vector<int> values;
+    values += 1,2,3,4,5,6,7,8,9;
+    
+    cout << "# of values: " << values.size() << endl;
+    for (const auto v: values) {
+        cout << v << endl;
+    }
     return 0;
 }
