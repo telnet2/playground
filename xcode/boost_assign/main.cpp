@@ -7,10 +7,34 @@
 //
 
 #include <iostream>
-#include "boost/assign"
+#include <vector>
+#include <list>
+
+using namespace std;
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    list<int> l{1,2,3,4};
+    
+    for (auto i: l) {
+        cout << i << endl;
+    }
+    
+    auto iter = l.begin();
+    auto first = l.begin();
+    
+    cout << "first: " << *iter << endl;
+    ++iter;
+    cout << "first: " << *first << endl;
+    cout << "second: " << *iter << endl;
+    
+    auto new_end = remove(begin(l), end(l), 1);
+    
+    cout << "sizeof L: " << l.size() << endl;
+    l.erase(new_end, end(l));
+    cout << "sizeof L: " << l.size() << endl;
+    
+    // The content of iter has chagned to 2
+    cout << "first: " << *first << endl;
+    cout << "iter: " << *iter << endl;
     return 0;
 }
